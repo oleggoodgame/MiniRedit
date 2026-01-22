@@ -90,7 +90,7 @@ class _EndSignUpScreenState extends ConsumerState<StartSignUp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign Up - Step 2')),
+      appBar: AppBar(title: const Text('Who are you?')),
       body: SafeArea(
         child: Column(
           children: [
@@ -156,7 +156,7 @@ class _EndSignUpScreenState extends ConsumerState<StartSignUp> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      child: const Text('End registration'),
+                      child: const Text('Continue'),
                     ),
                   ],
                 ),

@@ -66,7 +66,7 @@ class _MainAppState extends ConsumerState<MainApp> {
     if (_pendingUri == null) return;
 
     final uri = _pendingUri!;
-    _pendingUri = null; // Щоб не обробляти двічі
+    _pendingUri = null; 
 
     final region = uri.queryParameters['region'];
     final id = uri.queryParameters['id'];

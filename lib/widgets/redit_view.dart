@@ -127,7 +127,7 @@ class _ReditChoosenScreenState extends ConsumerState<ReditViewWidget> {
                 ),
               ),
             ),
-            const SizedBox(height: 10,),
+            const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -313,7 +313,7 @@ class _ReditChoosenScreenState extends ConsumerState<ReditViewWidget> {
                         icon: const Icon(Icons.share, color: Colors.grey),
                         onPressed: () async {
                           final link =
-                              'https://url.example.mini_redit?region=ukr&category=${widget.redit.category[0]}&id=${widget.redit.id}';
+                              'https://url.example.mini_redit?region=ukr&category=${widget.redit.category[0].name}&id=${widget.redit.id}';
 
                           try {
                             await Share.share(link);

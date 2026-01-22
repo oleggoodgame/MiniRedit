@@ -10,7 +10,7 @@ class CategoriesScreen extends StatelessWidget {
   void _selectCategory(BuildContext context, Category category) {
     print("SSS");
 
-    context.pushNamed("redit", extra: category);//ця частина коду не працює
+    context.pushNamed("redit", extra: category);
 
     print("FFF");
   }
