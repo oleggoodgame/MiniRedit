@@ -6,6 +6,7 @@ import 'package:mini_redit/database/firebase.dart';
 import 'package:mini_redit/models/category.dart';
 import 'package:mini_redit/models/news.dart';
 import 'package:mini_redit/providers/auth.dart';
+import 'package:mini_redit/providers/onBoarding.dart';
 import 'package:mini_redit/providers/user.dart';
 import 'package:mini_redit/screens/add_redit.dart';
 import 'package:mini_redit/screens/authentication/logIn.dart';
@@ -20,51 +21,60 @@ import 'package:mini_redit/screens/redit.dart';
 import 'package:mini_redit/screens/redit_choosen.dart';
 import 'package:mini_redit/screens/tabs.dart';
 import 'package:mini_redit/widgets/redit_view.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
+final firebaseAuthProvider = StreamProvider<User?>((ref) {
+  return FirebaseAuth.instance.authStateChanges();
+});
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final isLoggedIn = ref.watch(accountProvider).value?.isLoggedIn ?? false;
-  final userData = ref.watch(userDataProvider);
-  final firebaseUser = FirebaseAuth.instance.currentUser;
-  // final onboardingAsync = ref.watch(onboardingProvider);
-
-  final bool isAnonymous = firebaseUser?.isAnonymous ?? false;
-  Future<bool> get() async {
-    final prefs = await SharedPreferences.getInstance();
-    final seen = prefs.getBool('see') ?? false;
-    return seen;
-  }
-
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/onboarding',
-    redirect: (context, state) async{
-      final loggingIn = state.uri.path == '/login';
-      final signingUp = state.uri.path == '/signup';
-      final signingUpEnd = state.uri.path == '/signup_end';
-      print(userData.end);
-      print(userData.email);
-      final seen = await get();
-      if (!seen) return '/onboarding';
-      if (isAnonymous) return '/categories';
-      if (userData.end) {
-        return '/signup_end';
+    initialLocation: null,
+    // refreshListenable: ,
+    redirect: (context, state) async {
+      // final isLoggedIn = ref.read(accountProvider).value?.isLoggedIn ?? false;
+      final userData = ref.read(userDataProvider);
+      final firebaseUser = FirebaseAuth.instance.currentUser;
+      final bool isAnonymous = firebaseUser?.isAnonymous ?? false;
+      // final user = FirebaseAuth.instance.currentUser;
+      bool ififif = ref.read(onboardingProvider);
+      print("IFIFIF $ififif");
+      final fifi = await ref.read(onboardingProvider.notifier).load();
+      ififif = fifi;
+      final path = state.uri.path;
+      print(path);
+      print(fifi);
+      final isLogin = path == '/login';
+      final isSignUp = path.startsWith('/signup');
+      // final isOnboarding = path == '/onboarding';
+      if (path == '/') {
+        final firebaseUser = FirebaseAuth.instance.currentUser;
+        final seenOnboarding = await ref
+            .read(onboardingProvider.notifier)
+            .load();
+        print(firebaseUser);
+        if (!seenOnboarding) return '/onboarding';
+        if (firebaseUser == null) return '/login';
+        return '/categories';
       }
-      if (!isLoggedIn && userData.end && signingUpEnd) return null;
+      if (isAnonymous) return '/categories';
+      if ((firebaseUser == null) && userData.isSigningUp && !isSignUp)
+        return '/signup';
+      if ((firebaseUser == null) && !isLogin && !isSignUp && fifi) {
+        print("REDIRECTED TO login");
+        print(firebaseUser);
 
-      // if (!isLoggedIn && !loggingIn && !signingUp && !signingUpEnd) {
-      //   return '/login';
-      // }
+        return '/login';
+      }
 
-      if (isLoggedIn && (loggingIn || signingUp || signingUpEnd)) {
+      if (firebaseUser != null && !fifi) {
+        print(firebaseUser);
         return '/categories';
       }
 
       return null;
     },
-
     routes: [
       GoRoute(
         path: '/onboarding',
@@ -81,11 +91,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
-        name: 'signup_end',
-        path: '/signup_end',
+        name: 'signup/start',
+        path: '/signup/start',
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
-          child: const EndSignUp(),
+          child: const StartSignUp(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
           },
@@ -120,7 +130,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: "/redit",
                 name: "redit",
-                parentNavigatorKey: rootNavigatorKey, // правильно
+                parentNavigatorKey: rootNavigatorKey,
                 builder: (context, state) {
                   final category = state.extra as Category;
                   print(category);

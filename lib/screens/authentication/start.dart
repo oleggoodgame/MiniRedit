@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mini_redit/providers/onBoardib.dart';
+import 'package:mini_redit/providers/onBoarding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -13,7 +13,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
-  final PageController _controller = PageController(); // що це робить?
+  final PageController _controller = PageController();
   int _currentPage = 0;
 
   final Color orange = Colors.orange;
@@ -22,6 +22,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void _finishOnboarding() async {
     await ref.read(onboardingProvider.notifier).completeOnboarding();
     if (mounted) {
+      print("I go");
       context.go('/login');
     }
   }
@@ -34,7 +35,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         children: [
           Expanded(
             child: PageView(
-              // що це таке?
               controller: _controller,
               onPageChanged: (index) => setState(() => _currentPage = index),
               children: [
@@ -68,8 +68,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       subtitle:
           "Your space for thoughts, stories, and experiences. Share with others easily and quickly!",
       buttonText: "Next",
-      extraText: "skip", // що це таке?
-      onExtraTap: _finishOnboarding, // що це таке
+      extraText: "skip",
+      onExtraTap: _finishOnboarding,
       onButtonPressed: () => _controller.nextPage(
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
@@ -93,10 +93,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             onPressed: () async {
               final prefs = await SharedPreferences.getInstance();
-              await prefs.setBool('see', true);
+              await prefs.setBool('seenOnboarding', true);
               if (mounted) context.go('/login');
             },
-            child: const Text("Log in"),
+            child: const Text("Log in", style: TextStyle(color: Colors.white)),
           ),
           const SizedBox(height: 12),
           ElevatedButton(
@@ -109,10 +109,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             onPressed: () async {
               final prefs = await SharedPreferences.getInstance();
-              await prefs.setBool('see', true);
-              if (mounted) context.go('/signup');
+              await prefs.setBool('seenOnboarding', true);
+              if (mounted) context.go('/signup/start');
             },
-            child: const Text("Registration"),
+            child: const Text(
+              "Registration",
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -125,7 +128,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     String? buttonText,
     String? extraText,
     VoidCallback? onButtonPressed,
-    VoidCallback? onExtraTap, // що робить це
+    VoidCallback? onExtraTap,
     Widget? customContent,
   }) {
     return Padding(

@@ -3,14 +3,13 @@ class UserData {
   final String password;
   final String name;
   final String surname;
-  final bool end;
-
+final bool isSigningUp;
   UserData({
     this.name = '',
     this.surname = '',
     this.email = '',
     this.password = '',
-    this.end = false,
+    this.isSigningUp = false
   });
 
   UserData copyWith({
@@ -19,13 +18,14 @@ class UserData {
     String? email,
     String? password,
     bool? end,
+    bool? isSigningUp
   }) {
     return UserData(
       name: name ?? this.name,
       surname: surname ?? this.surname,
       email: email ?? this.email,
       password: password ?? this.password,
-      end: end ?? this.end,
+       isSigningUp: isSigningUp ?? this.isSigningUp,
     );
   }
 }

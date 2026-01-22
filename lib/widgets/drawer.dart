@@ -139,31 +139,31 @@ class MainDrawer extends ConsumerWidget {
             },
           ),
           Container(height: 1, color: Colors.grey),
-          ListTile(
-            leading: Icon(
-              Icons.settings,
-              color: currentRoute == '/settings'
-                  ? Colors.orange
-                  : Theme.of(context).colorScheme.onBackground,
-            ),
-            title: Text(
-              'Settings',
-              style: TextStyle(
-                color: currentRoute == '/settings'
-                    ? Colors.orange
-                    : Theme.of(context).colorScheme.onBackground,
-                fontWeight: currentRoute == '/settings'
-                    ? FontWeight.bold
-                    : FontWeight.normal,
-                fontSize: 20,
-              ),
-            ),
-            onTap: () {
-              if (currentRoute != '/settings') {
-                context.go('/settings');
-              }
-            },
-          ),
+          // ListTile(
+          //   leading: Icon(
+          //     Icons.settings,
+          //     color: currentRoute == '/settings'
+          //         ? Colors.orange
+          //         : Theme.of(context).colorScheme.onBackground,
+          //   ),
+          //   title: Text(
+          //     'Settings',
+          //     style: TextStyle(
+          //       color: currentRoute == '/settings'
+          //           ? Colors.orange
+          //           : Theme.of(context).colorScheme.onBackground,
+          //       fontWeight: currentRoute == '/settings'
+          //           ? FontWeight.bold
+          //           : FontWeight.normal,
+          //       fontSize: 20,
+          //     ),
+          //   ),
+          //   onTap: () {
+          //     if (currentRoute != '/settings') {
+          //       context.go('/settings');
+          //     }
+          //   },
+          // ),
           ListTile(
             leading: Icon(Icons.logout_outlined),
             title: Text(
@@ -172,6 +172,7 @@ class MainDrawer extends ConsumerWidget {
             ),
             onTap: () async {
               await FirebaseAuth.instance.signOut();
+              context.go('/');
               ref.invalidate(accountProvider);
             },
           ),

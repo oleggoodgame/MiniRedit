@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mini_redit/database/firebase.dart';
+import 'package:mini_redit/models/account.dart';
 import 'package:mini_redit/models/decoration.dart';
 import 'package:mini_redit/providers/auth.dart';
 import 'package:mini_redit/providers/user.dart';
@@ -63,11 +64,24 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     if (_formKey.currentState!.validate()) {
       final email = _emailController.text;
       final password = _passwordController.text;
-
       try {
-        ref.read(userDataProvider.notifier).setEnd(true);
-        ref.read(userDataProvider.notifier).setStart(email, password);
-        context.pushNamed('signup_end');
+        final userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: email, password: password);
+
+        final uid = userCredential.user!.uid;
+        await db.createProfile(
+          uid,
+          Account(
+            ref.read(userDataProvider).name,
+            ref.read(userDataProvider).surname,
+            true,
+            null,
+            email,
+          ),
+        );
+
+        ref.read(userDataProvider.notifier).clear();
+        if (context.mounted) context.go('/categories');
       } catch (e) {
         ScaffoldMessenger.of(
           context,
@@ -204,29 +218,28 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             if (result == null) return;
 
                             if (result.isNewUser) {
-                              context.go('/signup_end');
+                              context.push('/signup_end');
                             } else {
+                              ref.invalidate(accountProvider);
                               context.go('/categories');
                             }
                           },
                         ),
                         const SizedBox(height: 10),
-                        buildAvatarButton(
-                          image: 'assets/images/github.png',
-                          text: 'Sign up with GitHub',
-                          onTap: () async {
-                            final provider = OAuthProvider('github');
-                            provider.addScope('read:user');
-                            provider.addScope('user:email');
+                        // buildAvatarButton(
+                        //   image: 'assets/images/github.png',
+                        //   text: 'Sign up with GitHub',
+                        //   onTap: () async {
+                        //     final provider = OAuthProvider('github');
+                        //     provider.addScope('read:user');
+                        //     provider.addScope('user:email');
 
-                            try {
-                              final userCred = await FirebaseAuth.instance
-                                  .signInWithProvider(provider);
-                            } catch (e) {
-                              // обробити помилку
-                            }
-                          },
-                        ),
+                        //     try {
+                        //       final userCred = await FirebaseAuth.instance
+                        //           .signInWithProvider(provider);
+                        //     } catch (e) {}
+                        //   },
+                        // ),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -235,7 +248,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       children: [
                         const Text("Already have an account?"),
                         GestureDetector(
-                          onTap: () => context.go('/login'),
+                          onTap: () {
+                            ref.read(userDataProvider.notifier).clear();
+                            context.go('/login');
+                          },
                           child: const Text(
                             " Log In",
                             style: TextStyle(

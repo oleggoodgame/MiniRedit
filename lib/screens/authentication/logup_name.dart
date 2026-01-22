@@ -5,16 +5,17 @@ import 'package:go_router/go_router.dart';
 import 'package:mini_redit/database/firebase.dart';
 import 'package:mini_redit/models/account.dart';
 import 'package:mini_redit/models/decoration.dart';
+import 'package:mini_redit/providers/auth.dart';
 import 'package:mini_redit/providers/user.dart';
 
-class EndSignUp extends ConsumerStatefulWidget {
-  const EndSignUp({super.key});
+class StartSignUp extends ConsumerStatefulWidget {
+  const StartSignUp({super.key});
 
   @override
-  ConsumerState<EndSignUp> createState() => _EndSignUpScreenState();
+  ConsumerState<StartSignUp> createState() => _EndSignUpScreenState();
 }
 
-class _EndSignUpScreenState extends ConsumerState<EndSignUp> {
+class _EndSignUpScreenState extends ConsumerState<StartSignUp> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _surnameController = TextEditingController();
@@ -25,15 +26,40 @@ class _EndSignUpScreenState extends ConsumerState<EndSignUp> {
       try {
         final name = _nameController.text.trim();
         final surname = _surnameController.text.trim();
-
         final user = FirebaseAuth.instance.currentUser;
-        if (user == null) throw Exception('No authenticated user');
+        print(user);
+        if (user == null) {
+          await ref.read(userDataProvider.notifier).setName(name);
+          await ref.read(userDataProvider.notifier).setSurname(surname);
+          ref.read(userDataProvider.notifier).toggle();
 
-        final isGoogleUser = user.providerData.any(
+          print("WORKED");
+          context.push('/signup');
+          return;
+        }
+        // if (user == null) {
+        //   final userData = ref.read(userDataProvider);
+        //   // final email = userData.email;
+        //   // final password = userData.password;
+
+        //   final userCredential = await FirebaseAuth.instance
+        //       .createUserWithEmailAndPassword(email: email, password: password);
+
+        //   final uid = userCredential.user!.uid;
+        //   await db.createProfile(
+        //     uid,
+        //     Account(name, surname, true, null, email),
+        //   );
+
+        //   ref.read(userDataProvider.notifier).clear();
+        //   if (context.mounted) context.go('/categories');
+        // }
+
+        final isGoogleUser = user?.providerData.any(
           (p) => p.providerId == 'google.com',
         );
 
-        if (isGoogleUser) {
+        if (isGoogleUser != null) {
           final uid = user.uid;
           final email = user.email;
 
@@ -43,31 +69,9 @@ class _EndSignUpScreenState extends ConsumerState<EndSignUp> {
           );
 
           ref.read(userDataProvider.notifier).clear();
+          ref.invalidate(accountProvider);
           if (context.mounted) context.go('/categories');
-        }
-        else {
-          final userData = ref.read(userDataProvider);
-          final email = userData.email;
-          final password = userData.password;
-
-          if (email == null || password == null) {
-            throw Exception(
-              'Missing email or password for normal registration',
-            );
-          }
-
-          final userCredential = await FirebaseAuth.instance
-              .createUserWithEmailAndPassword(email: email, password: password);
-
-          final uid = userCredential.user!.uid;
-          await db.createProfile(
-            uid,
-            Account(name, surname, true, null, email),
-          );
-
-          ref.read(userDataProvider.notifier).clear();
-          if (context.mounted) context.go('/categories');
-        }
+        } else {}
       } catch (e) {
         ScaffoldMessenger.of(
           context,
@@ -85,8 +89,6 @@ class _EndSignUpScreenState extends ConsumerState<EndSignUp> {
 
   @override
   Widget build(BuildContext context) {
-    final userNotifier = ref.read(userDataProvider.notifier);
-
     return Scaffold(
       appBar: AppBar(title: const Text('Sign Up - Step 2')),
       body: SafeArea(
@@ -121,7 +123,6 @@ class _EndSignUpScreenState extends ConsumerState<EndSignUp> {
                                 (value == null || value.isEmpty)
                                 ? 'Name is required'
                                 : null,
-                            onChanged: (val) => userNotifier.setName(val),
                           ),
                           const SizedBox(height: 20),
                           TextFormField(
@@ -131,7 +132,6 @@ class _EndSignUpScreenState extends ConsumerState<EndSignUp> {
                                 (value == null || value.isEmpty)
                                 ? 'Surname is required'
                                 : null,
-                            onChanged: (val) => userNotifier.setSurname(val),
                           ),
                         ],
                       ),

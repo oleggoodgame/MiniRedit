@@ -3,11 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-// import 'package:http/http.dart' as http;
 import 'package:mini_redit/database/firebase.dart';
 import 'package:mini_redit/models/decoration.dart';
 import 'package:mini_redit/providers/auth.dart';
-// import 'package:mini_redit/secrets_key_gh.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -236,20 +234,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             if (result == null) return;
 
                             if (result.isNewUser) {
-                              context.go('/signup_end');
+                              context.go('/signup/start');
                             } else {
+                              ref.invalidate(accountProvider);
                               context.go('/categories');
                             }
                           },
                         ),
                         const SizedBox(height: 10),
-                        buildAvatarButton(
-                          image: 'assets/images/github.png',
-                          text: 'Log In with Github',
-                          onTap: () async {
-                            // await signInWithGitHub();
-                          },
-                        ),
+                        // buildAvatarButton(
+                        //   image: 'assets/images/github.png',
+                        //   text: 'Log In with Github',
+                        //   onTap: () async {
+                        //     // await signInWithGitHub();
+                        //   },
+                        // ),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -258,7 +257,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       children: [
                         const Text("Don't have an account?"),
                         GestureDetector(
-                          onTap: () => context.go('/signup'),
+                          onTap: () => context.push('/signup/start'),
                           child: const Text(
                             " Sign Up",
                             style: TextStyle(

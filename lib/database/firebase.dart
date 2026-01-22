@@ -390,22 +390,18 @@ class DatabaseService {
     return favorites;
   }
 
-  Future<
-    ({UserCredential userCredential, bool isNewUser})?
-  > // сюди додати ref, і через ref передати дані про емейл, і додати перевірку у edit Profile, чи акаунт через гугл чи ні
-  signInWithGoogle(WidgetRef ref) async {
+  Future<({UserCredential userCredential, bool isNewUser})?> signInWithGoogle(
+    WidgetRef ref,
+  ) async {
     try {
-      await GoogleSignIn.instance.initialize(
-        serverClientId:
-            Google,
-      );
+      await GoogleSignIn.instance.initialize(serverClientId: Google);
 
       final GoogleSignInAccount? googleUser = await GoogleSignIn.instance
           .authenticate();
       if (googleUser == null) {
-      print("ℹ️ Користувач скасував вхід через Google");
-      return null;
-    }
+        print("ℹ️ Користувач скасував вхід через Google");
+        return null;
+      }
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
@@ -424,9 +420,13 @@ class DatabaseService {
       if (uid != null) {
         final userDoc = await _db.collection('users').doc(uid).get();
         if (!userDoc.exists) {
-          ref.read(userDataProvider.notifier).setEnd(true);
-          ref.read(userDataProvider.notifier).setStart(userCredential.user?.email, null);
+          ref
+              .read(userDataProvider.notifier)
+              .setStart(userCredential.user?.email, null);
           isNewUser = true;
+        }
+        else{
+          // треба заповнити тоді тут 
         }
       }
 

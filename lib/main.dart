@@ -40,14 +40,11 @@ class _MainAppState extends ConsumerState<MainApp> {
     super.initState();
     _appLinks = AppLinks();
 
-    // Зберігаємо initialUri, щоб обробити його після mount
     _pendingUri = widget.initialUri;
 
-    // Підписка на deep links
     _linkSubscription = _appLinks.uriLinkStream.listen(
       (uri) {
         print('[uriLinkStream] received uri = $uri');
-        // Зберігаємо у pendingUri і обробимо у didChangeDependencies
         _pendingUri = uri;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _handleDeepLinkIfReady();
@@ -62,7 +59,6 @@ class _MainAppState extends ConsumerState<MainApp> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Тут контекст вже "має" GoRouter
     _handleDeepLinkIfReady();
   }
 

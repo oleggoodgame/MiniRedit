@@ -85,7 +85,7 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen> {
 
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            color: Colors.white,
+            color: Colors.black,
             child: Row(
               children: [
                 Expanded(
